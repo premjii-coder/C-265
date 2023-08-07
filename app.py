@@ -4,6 +4,9 @@ from flask import  Flask, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
 import cv2
 import numpy as np
+# import additional libraries below
+
+
 
 app = Flask(__name__)
 
@@ -12,39 +15,56 @@ app = Flask(__name__)
 def load_form():
     return render_template('upload.html')
 
-
 # Function to upload image and redirect to new webpage
 @app.route('/gray', methods=['POST'])
 def upload_image():
     file = request.files['file']
     filename = secure_filename(file.filename)
-
-    file_data = make_grayscale(file.read())
-    with open(os.path.join('static/', filename),
-              'wb') as f:
+    # write the read and write function on image below 
+    file_data=make_grayscale(file.read())
+    with open(os.path.join("static/",filename),"wb")as f:
         f.write(file_data)
+
+    
+
+
+        # ends here
 
     display_message = 'Image successfully uploaded and displayed below'
     return render_template('upload.html', filename=filename, message = display_message)
 
 
+# Write the make_grayscale() function below
+def make_grayscale(input_img):
+    image_array=np.fromstring(input_img,dtype="uint8")
+    print("image array = ",image_array)
 
-def make_grayscale(input_image):
+    img_into_array=cv2.imdecode(image_array,cv2.IMREAD_UNCHANGED)
+    print("decode : ",img_into_array)
 
-    image_array = np.fromstring(input_image, dtype='uint8')
-    print('Image Array:',image_array)
+    converted_grey_img=cv2.cvtColor(img_into_array,cv2.COLOR_RGB2GRAY)
+    status, output_img=cv2.imencode(".PNG",converted_grey_img)
+    print("status :",status)
 
-    # decode the array into an image
-    decode_array_to_img = cv2.imdecode(image_array, cv2.IMREAD_UNCHANGED)
-    print('Decode values of Image:', decode_array_to_img)
+    return output_img
+    
 
-    # Make grayscale
-    converted_gray_img = cv2.cvtColor(decode_array_to_img, cv2.COLOR_RGB2GRAY)
-    status, output_image = cv2.imencode('.PNG', converted_gray_img)
-    print('Status:',status)
 
-    return output_image
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+# make_grayscale() function ends above
 
 @app.route('/display/<filename>')
 def display_image(filename):
